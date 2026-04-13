@@ -11,6 +11,12 @@ AI-powered mock interview platform to help candidates practice role-based interv
 - Credit-based usage model with Razorpay integration.
 - Secure cookie-based backend auth.
 
+- ## Preview
+
+![Dashboard](https://github.com/sanskaragrawal0608-bit/major_project_interviewIQ/raw/main/client/src/assets/screenshots/Dashboard.jpeg)
+
+![Question Breakdown](https://github.com/sanskaragrawal0608-bit/major_project_interviewIQ/raw/main/client/src/assets/screenshots/Question%20Breakdown.png)
+
 ## Tech Stack
 
 - Frontend: React, Vite, Redux Toolkit, Tailwind CSS
