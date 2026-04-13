@@ -4,6 +4,14 @@ import { askAi } from "../services/openRouter.service.js";
 import User from "../models/user.model.js";
 import Interview from "../models/interview.model.js";
 
+const fallbackQuestions = ({ role, experience, mode, skillsText, projectText }) => ([
+  `Can you introduce yourself and explain your ${experience} experience as a ${role} in simple terms?`,
+  `Which ${role} project taught you the most, and what technical and communication challenges did you solve there?`,
+  `In a ${mode} setting, how would you design and optimize a feature using ${skillsText} for real users?`,
+  `Tell me about a difficult bug in ${projectText} and how you identified root cause, fixed it, and verified results.`,
+  `If asked to improve scalability and reliability as a ${role}, what architecture changes would you prioritize and why?`
+]);
+
 export const analyzeResume = async (req, res) => {
   try {
     if (!req.file) {
@@ -55,9 +63,30 @@ Return strictly JSON:
     ];
 
 
-    const aiResponse = await askAi(messages)
+    let parsed = {
+      role: "Software Engineer",
+      experience: "1 year",
+      projects: [],
+      skills: []
+    };
 
-    const parsed = JSON.parse(aiResponse);
+    try {
+      const aiResponse = await askAi(messages)
+      parsed = JSON.parse(aiResponse);
+    } catch (error) {
+      // Fallback keeps resume flow usable when AI is unavailable or returns invalid JSON.
+      const lower = resumeText.toLowerCase();
+      const guessedSkills = ["javascript", "react", "node", "mongodb", "express", "python", "java", "sql"]
+        .filter((skill) => lower.includes(skill))
+        .map((skill) => skill.toUpperCase() === "SQL" ? "SQL" : skill[0].toUpperCase() + skill.slice(1));
+
+      parsed = {
+        role: "Software Engineer",
+        experience: "1 year",
+        projects: [],
+        skills: guessedSkills
+      };
+    }
 
     fs.unlinkSync(filepath)
 
@@ -102,7 +131,8 @@ export const generateQuestion = async (req, res) => {
       });
     }
 
-    if (user.credits < 50) {
+    const isDevMode = process.env.NODE_ENV !== "production";
+    if (!isDevMode && user.credits < 50) {
       return res.status(400).json({
         message: "Not enough credits. Minimum 50 required."
       });
@@ -172,7 +202,12 @@ Make questions based on the candidate’s role, experience,interviewMode, projec
     ];
 
 
-    const aiResponse = await askAi(messages)
+    let aiResponse = "";
+    try {
+      aiResponse = await askAi(messages)
+    } catch (error) {
+      aiResponse = fallbackQuestions({ role, experience, mode, skillsText, projectText }).join("\n")
+    }
 
     if (!aiResponse || !aiResponse.trim()) {
            
@@ -195,8 +230,10 @@ Make questions based on the candidate’s role, experience,interviewMode, projec
       });
     }
 
-    user.credits -= 50;
-    await user.save();
+    if (!isDevMode) {
+      user.credits -= 50;
+      await user.save();
+    }
 
     const interview = await Interview.create({
       userId: user._id,

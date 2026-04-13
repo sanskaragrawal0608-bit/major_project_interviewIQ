@@ -50,6 +50,7 @@ function Step1SetUp({ onStart }) {
 
         } catch (error) {
             console.log(error)
+            alert(error?.response?.data?.message || "Resume analysis failed. You can still continue by entering role and experience manually.")
             setAnalyzing(false);
         }
     }
@@ -67,6 +68,7 @@ function Step1SetUp({ onStart }) {
 
         } catch (error) {
             console.log(error)
+            alert(error?.response?.data?.message || "Failed to start interview.")
             setLoading(false)
         }
     }

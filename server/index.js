@@ -10,8 +10,15 @@ import interviewRouter from "./routes/interview.route.js"
 import paymentRouter from "./routes/payment.route.js"
 
 const app = express()
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5175"]
+
 app.use(cors({
-    origin:"http://localhost:5173",
+    origin(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true)
+        }
+        return callback(new Error("Not allowed by CORS"))
+    },
     credentials:true
 }))
 
