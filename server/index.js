@@ -10,7 +10,13 @@ import interviewRouter from "./routes/interview.route.js"
 import paymentRouter from "./routes/payment.route.js"
 
 const app = express()
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5175"]
+const allowedOrigins = (
+    process.env.CLIENT_URLS ||
+    "http://localhost:5173,http://localhost:5174,http://localhost:5175"
+)
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
 
 app.use(cors({
     origin(origin, callback) {

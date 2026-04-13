@@ -7,6 +7,8 @@ import { FaUserAstronaut } from "react-icons/fa";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { signOut } from 'firebase/auth';
+import { auth } from '../utils/firebase';
 import { ServerUrl } from '../App';
 import { setUserData } from '../redux/userSlice';
 import AuthModel from './AuthModel';
@@ -21,6 +23,11 @@ function Navbar() {
     const handleLogout = async () => {
         try {
             await axios.get(ServerUrl + "/api/auth/logout" , {withCredentials:true})
+            try {
+                await signOut(auth)
+            } catch (_) {
+                // Firebase session already cleared
+            }
             dispatch(setUserData(null))
             setShowCreditPopup(false)
             setShowUserPopup(false)

@@ -61,6 +61,12 @@ function Pricing() {
   const handlePayment = async (plan) => {
     try {
       setLoadingPlan(plan.id)
+      const razorpayKeyId = (import.meta.env.VITE_RAZORPAY_KEY_ID || "").trim();
+      if (!razorpayKeyId || razorpayKeyId.includes("add your")) {
+        alert("Razorpay key is not configured in client env.");
+        setLoadingPlan(null);
+        return;
+      }
 
       const amount =  
       plan.id === "basic" ? 100 :
@@ -74,7 +80,7 @@ function Pricing() {
       
 
       const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      key: razorpayKeyId,
       amount: result.data.amount,
       currency: "INR",
       name: "InterviewIQ.AI",
@@ -100,7 +106,8 @@ function Pricing() {
 
       setLoadingPlan(null);
     } catch (error) {
-     console.log(error)
+     console.log(error?.response?.data || error)
+     alert(error?.response?.data?.message || "Payment failed. Please try again.");
      setLoadingPlan(null);
     }
   }

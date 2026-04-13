@@ -5,6 +5,17 @@ import crypto from "crypto"
 
 export const createOrder = async (req,res) => {
     try {
+        if (
+          !process.env.RAZORPAY_KEY_ID ||
+          !process.env.RAZORPAY_KEY_SECRET ||
+          process.env.RAZORPAY_KEY_ID.includes("add your") ||
+          process.env.RAZORPAY_KEY_SECRET.includes("add your")
+        ) {
+          return res
+            .status(500)
+            .json({ message: "Razorpay keys are not configured on server" });
+        }
+
         const {planId, amount, credits} = req.body;
           if (!amount || !credits) {
       return res.status(400).json({ message: "Invalid plan data" });

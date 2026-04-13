@@ -19,7 +19,9 @@ const isAuth = async (req,res,next) => {
    
 
     } catch (error) {
-        return res.status(500).json({message:`isAuth error ${error}`})
+        // Clear stale/invalid token so client can re-auth cleanly.
+        res.clearCookie("token")
+        return res.status(401).json({ message: "unauthorized: invalid token" })
     }
     
 }
